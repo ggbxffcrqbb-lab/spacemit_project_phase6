@@ -75,10 +75,14 @@ class RetrievedChunk:
 class _KnowledgeChunk:
     chunk_id: str
     source_path: str
+    doc_title: str
     title: str
+    heading_text: str
     text: str
     tokens: list[str]
     token_counts: dict[str, int]
+    heading_tokens: list[str]
+    heading_token_counts: dict[str, int]
     length: int
 
 
@@ -147,23 +151,39 @@ class LocalKnowledgeBase:
         for section_title, section_text in sections:
             for chunk_text in self._chunk_text(section_text):
                 tokens = self._tokenize(chunk_text)
-                if not tokens:
+                heading_text = self._build_heading_text(doc_title, section_title)
+                heading_tokens = self._tokenize(heading_text)
+                if not tokens and not heading_tokens:
                     continue
                 chunk_id = f"{path.stem}-{chunk_index:03d}"
                 token_counts = Counter(tokens)
+                heading_token_counts = Counter(heading_tokens)
                 chunks.append(
                     _KnowledgeChunk(
                         chunk_id=chunk_id,
                         source_path=str(path),
+                        doc_title=doc_title,
                         title=section_title or doc_title,
+                        heading_text=heading_text,
                         text=chunk_text,
                         tokens=tokens,
                         token_counts=dict(token_counts),
+                        heading_tokens=heading_tokens,
+                        heading_token_counts=dict(heading_token_counts),
                         length=max(len(tokens), 1),
                     )
                 )
                 chunk_index += 1
         return chunks
+
+    def _build_heading_text(self, doc_title: str, section_title: str) -> str:
+        section_title = section_title.strip()
+        doc_title = doc_title.strip()
+        if not section_title:
+            return doc_title
+        if section_title == doc_title:
+            return doc_title
+        return f"{doc_title}\n{section_title}"
 
     def _extract_doc_title(self, path: Path, text: str) -> str:
         for line in text.splitlines():
@@ -289,14 +309,20 @@ class LocalKnowledgeBase:
         lowered_query = query.lower()
 
         for chunk in self._chunks:
-            overlap_terms = sorted(unique_query_terms.intersection(chunk.token_counts))
-            if not overlap_terms:
+            text_overlap_terms = unique_query_terms.intersection(chunk.token_counts)
+            heading_overlap_terms = unique_query_terms.intersection(chunk.heading_token_counts)
+            heading_contains_query = bool(lowered_query) and lowered_query in chunk.heading_text.lower()
+            text_contains_query = bool(lowered_query) and lowered_query in chunk.text.lower()
+            overlap_terms = sorted(text_overlap_terms.union(heading_overlap_terms))
+            if not overlap_terms and not heading_contains_query and not text_contains_query:
                 continue
 
             score = self._bm25_score(chunk, unique_query_terms)
-            if lowered_query in chunk.text.lower():
+            score += self._heading_score(chunk, unique_query_terms, lowered_query)
+            if text_contains_query:
                 score += 2.5
-            score += min(len(overlap_terms) * 0.18, 1.2)
+            score += min(len(text_overlap_terms) * 0.18, 1.2)
+            score += min(len(heading_overlap_terms) * 0.6, 1.8)
             if score < self.config.min_score:
                 continue
 
@@ -313,6 +339,32 @@ class LocalKnowledgeBase:
 
         scored.sort(key=lambda item: item.score, reverse=True)
         return scored[:top_k]
+
+    def _heading_score(
+        self,
+        chunk: _KnowledgeChunk,
+        query_terms: set[str],
+        lowered_query: str,
+    ) -> float:
+        if not chunk.heading_token_counts:
+            return 0.0
+
+        score = 0.0
+        heading_lower = chunk.heading_text.lower()
+        if lowered_query and lowered_query in heading_lower:
+            score += 3.2
+
+        for term in query_terms:
+            freq = chunk.heading_token_counts.get(term, 0)
+            if not freq:
+                continue
+            score += self._idf(term) * min(freq, 1) * 1.2
+
+        if lowered_query == chunk.title.lower():
+            score += 1.2
+        elif lowered_query == chunk.doc_title.lower():
+            score += 1.0
+        return score
 
     def _bm25_score(self, chunk: _KnowledgeChunk, query_terms: set[str]) -> float:
         score = 0.0
@@ -352,10 +404,14 @@ class LocalKnowledgeBase:
                 {
                     "chunk_id": chunk.chunk_id,
                     "source_path": chunk.source_path,
+                    "doc_title": chunk.doc_title,
                     "title": chunk.title,
+                    "heading_text": chunk.heading_text,
                     "text": chunk.text,
                     "tokens": chunk.tokens,
                     "token_counts": chunk.token_counts,
+                    "heading_tokens": chunk.heading_tokens,
+                    "heading_token_counts": chunk.heading_token_counts,
                     "length": chunk.length,
                 }
                 for chunk in self._chunks
@@ -380,14 +436,20 @@ class LocalKnowledgeBase:
 
         chunks: list[_KnowledgeChunk] = []
         for item in payload.get("chunks", []):
+            if "heading_tokens" not in item or "heading_token_counts" not in item:
+                return False
             chunks.append(
                 _KnowledgeChunk(
                     chunk_id=item["chunk_id"],
                     source_path=item["source_path"],
+                    doc_title=item.get("doc_title", item["title"]),
                     title=item["title"],
+                    heading_text=item.get("heading_text", item["title"]),
                     text=item["text"],
                     tokens=item["tokens"],
                     token_counts=item["token_counts"],
+                    heading_tokens=item["heading_tokens"],
+                    heading_token_counts=item["heading_token_counts"],
                     length=int(item["length"]),
                 )
             )

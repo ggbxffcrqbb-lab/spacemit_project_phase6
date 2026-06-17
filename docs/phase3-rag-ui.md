@@ -6,6 +6,7 @@
 | 知识库目录 | `/mnt/ssd/spacemit_project/data/knowledge` | 导入后的 `.md` 知识文档统一落点 |
 | 索引缓存 | `/mnt/ssd/spacemit_project/data/index/knowledge_index.json` | 本地 RAG 索引缓存 |
 | 导入目录分流 | `data/knowledge/imported/*` | 按 `--dest-subdir` 细分来源 |
+| 当前知识库规模 | `15` 篇 / `174` chunks | 截至 `2026-06-17` |
 | 状态页目录 | `/mnt/ssd/logs/spacemit_project/ui` | 输出 `html/json/txt` 三份状态文件 |
 | 默认状态页 | `status_page.html` | 浏览器或 WebView 可直接打开 |
 | 默认屏幕文本页 | `status_screen.txt` | 适合串口屏、命令行屏、轻量看板 |
@@ -29,6 +30,14 @@ bash scripts/knowledge_import.sh /mnt/ssd/data/manuals --recursive \
 # 如果只想导入，不立刻重建索引
 bash scripts/knowledge_import.sh /mnt/ssd/data/manuals --recursive --no-rebuild
 
+# 导入 Windows 侧 OCR 后同步到板端的 Markdown
+bash scripts/knowledge_import.sh /mnt/ssd/data/manuals/field_public/mem_major_hidden_hazards_criteria_2026_ocr.md \
+  --category 公开资料 \
+  --tag OCR \
+  --tag 现场 \
+  --tag 标准 \
+  --dest-subdir imported/field_public_ocr
+
 # 单独重建索引
 bash scripts/voice.sh rag-rebuild
 
@@ -47,6 +56,24 @@ bash scripts/voice.sh doctor
 | 去重 | 同批次按内容 hash 与目标文件名双重去重 |
 | 导入台账 | 自动输出 `knowledge_import_catalog.json` |
 | 自动重建 | 导入完成后默认自动重建本地 RAG 索引 |
+| OCR 导入兼容 | 扫描 PDF 可先在 Windows 侧 OCR 成 `.md` 后再导入板端 |
+
+## 当前已验证的导入来源
+
+| 来源类型 | 落点 |
+|---|---|
+| 结构化公开资料知识卡 | `data/knowledge/imported/web_authority/` |
+| 原始 PDF / DOCX 抽取结果 | `data/knowledge/imported/field_public_raw/` |
+| 扫描 PDF OCR 结果 | `data/knowledge/imported/field_public_ocr/` |
+
+## 当前已验证的检索增强
+
+| 能力 | 现状 |
+|---|---|
+| 文档标题命中 | 已支持 |
+| 章节标题命中 | 已支持 |
+| 长短语直接命中保底 | 已支持 |
+| 真实问法回归 | `tests/rag_regression_suite.py` 当前命中 `16/16` |
 
 ## 状态页输出
 

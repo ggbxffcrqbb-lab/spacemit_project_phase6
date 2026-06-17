@@ -80,6 +80,13 @@
 2. Windows 侧单独拉一个干净镜像或克隆板端 repo
 3. 利用 Windows 上已登录的 GitHub 凭据，把这份板端镜像推到 GitHub
 
+`2026-06-16` 已实际验证过一次更稳的变体：
+
+1. 板端先提交 canonical 改动
+2. 如 `git clone ssh://...` 在 Windows 侧卡住，可先在板端执行 `git bundle create ... main`
+3. Windows 侧从 `.bundle` 还原干净镜像仓
+4. 再把镜像仓 `origin` 指向 GitHub 并推送
+
 ## 6. 常用命令模板
 
 ### 6.1 板端查看当前状态
@@ -112,6 +119,24 @@ git clone ssh://fyp@192.168.3.38/mnt/ssd/spacemit_project D:\spacemit\tmp\board_
 ```bash
 git -C D:\spacemit\tmp\board_mirror remote set-url origin https://github.com/ggbxffcrqbb-lab/spacemit_project.git
 git -C D:\spacemit\tmp\board_mirror push -u origin main
+```
+
+### 6.6 如果 SSH clone 卡住，可改用 bundle
+
+板端：
+
+```bash
+ssh fyp@192.168.3.38 "cd /mnt/ssd/spacemit_project && git bundle create /tmp/spacemit_project.bundle main"
+```
+
+Windows：
+
+```bash
+scp fyp@192.168.3.38:/tmp/spacemit_project.bundle D:\spacemit\tmp\spacemit_project.bundle
+git clone D:\spacemit\tmp\spacemit_project.bundle D:\spacemit\tmp\board_mirror_bundle
+git -C D:\spacemit\tmp\board_mirror_bundle checkout -b main origin/main
+git -C D:\spacemit\tmp\board_mirror_bundle remote set-url origin https://github.com/ggbxffcrqbb-lab/spacemit_project.git
+git -C D:\spacemit\tmp\board_mirror_bundle push -u origin main
 ```
 
 ## 7. Windows 辅助仓的维护建议

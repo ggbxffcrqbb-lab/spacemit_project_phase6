@@ -1,6 +1,6 @@
 # 项目现状与交接说明
 
-适用时间：`2026-06-15`
+适用时间：`2026-06-17`
 
 适用目的：给新的 Codex 对话、临时接手开发者、后续维护者快速建立项目上下文，避免重复摸底。
 
@@ -13,12 +13,12 @@
 | 唯一 canonical repo | `/mnt/ssd/spacemit_project` |
 | GitHub 仓库 | `https://github.com/ggbxffcrqbb-lab/spacemit_project.git` |
 | 当前主分支 | `main` |
-| 当前板端提交 | `f25210a` |
-| 当前 GitHub `main` | 已与板端 `f25210a` 同步 |
+| 当前板端提交 | `bc6a5d2` |
+| 当前 GitHub `main` | 已与板端 `bc6a5d2` 同步 |
 
 一句话结论：
 
-项目已经完成“板端正式工程收口 + 基础语音链路 + 本地 RAG + 更强知识导入 + 状态页 + Git 管理治理”，现在已经不是散落样例阶段，而是进入“可以持续维护和迭代的板端正式工程”阶段。
+项目已经完成“板端正式工程收口 + 基础语音链路 + 本地 RAG + 更强知识导入 + 状态页 + Git 管理治理 + 标题/章节增强检索 + OCR 导入 + 回归测试集”，现在已经不是散落样例阶段，而是进入“可以持续维护和迭代的板端正式工程”阶段。
 
 ## 2. 当前开发进度
 
@@ -35,7 +35,10 @@
 | 常驻语音服务 | 已完成 | `voice-console / warmup / doctor` 已统一 |
 | 本地 RAG | 已完成最小可用版 | 本地知识卡 + BM25/关键词检索 + 引用输出 |
 | 知识导入器 | 已完成增强版 | 支持 `.md/.txt/.pdf/.docx`、递归导入、分类/标签 |
+| RAG 检索增强 | 已完成第一轮 | 标题、章节标题已并入索引与打分，补了短语直命中的保底逻辑 |
 | 状态页 | 已完成 | 输出 `html/json/txt` 三份状态文件 |
+| 现场资料扩充 | 已完成第一轮 | 已导入公开资料、OCR 结果和结构化知识卡 |
+| 回归测试 | 已完成第一轮 | 板端 `tests/rag_regression_suite.py` 已做到 `16/16` 常见问法命中 |
 | 维护文档 | 已完成第一轮 | Git 维护手册已补齐 |
 
 ### 2.2 当前阶段判断
@@ -44,10 +47,10 @@
 |---|---|
 | 工程化程度 | 已从“样例拼装”进入“正式项目维护态” |
 | 板端开发能力 | 已具备 |
-| 本地知识库能力 | 已具备最小闭环 |
+| 本地知识库能力 | 已超过最小闭环，进入“可做真实问法回归”的阶段 |
 | GitHub 对外协作能力 | 已具备 |
 | 直接板端推 GitHub | 还未最终打通认证 |
-| 真正的领域知识规模 | 还偏小，当前主要是种子知识卡 |
+| 真正的领域知识规模 | 仍不算大，但已不再只有种子知识卡 |
 | 外设/实机联调完备度 | 仍需按任务继续推进 |
 
 ## 3. 当前已验证可用的能力
@@ -62,12 +65,14 @@
 | `python -m app.main rag-query` | 可运行 |
 | `python -m app.main rag-rebuild` | 可运行 |
 | `python -m app.main knowledge-import` | 可运行 |
+| `python tests/rag_heading_retrieval.py` | 可运行 |
+| `python tests/rag_regression_suite.py` | 可运行，当前命中 `16/16` |
 | 状态页文件输出 | 可运行 |
-| GitHub 同步 | 已可通过 Windows 辅助凭据完成 |
+| GitHub 同步 | 已可通过 Windows 干净镜像辅助推送完成 |
 
 ## 4. 板端最新运行状态快照
 
-以下状态基于 `2026-06-15` 当次板端 `doctor` 检查。
+以下状态基于 `2026-06-16` 至 `2026-06-17` 的板端验证与导入结果。
 
 | 项目 | 当前值 |
 |---|---|
@@ -77,13 +82,15 @@
 | ASR 实际使用模型 | `/mnt/ssd/models/asr/sensevoice-small/model_quant_optimized.onnx` |
 | TTS 目录存在 | 是 |
 | TTS 当前常驻 preset | `matcha_zh` |
-| TTS 初始化耗时 | 约 `24.5s` |
+| TTS 初始化耗时 | 约 `24-25s` |
 | RAG 已启用 | 是 |
 | 知识库目录 | `/mnt/ssd/spacemit_project/data/knowledge` |
-| 当前知识文档数 | `5` |
-| 当前 chunk 数 | `25` |
+| 当前知识文档数 | `15` |
+| 当前 chunk 数 | `174` |
+| 已导入子目录 | `imported/web_authority`、`imported/field_public_raw`、`imported/field_public_ocr` |
 | 状态页目录 | `/mnt/ssd/logs/spacemit_project/ui` |
 | 状态页格式 | `status_page.html / status_state.json / status_screen.txt` |
+| GitHub 同步状态 | 已同步到 `bc6a5d2` |
 
 ## 5. 当前项目结构重点
 
@@ -94,6 +101,8 @@
 | `app/rag/knowledge_base.py` | 本地检索与索引缓存 |
 | `app/rag/importer.py` | 强化版知识导入器 |
 | `app/ui/status_page.py` | 文本/HTML/JSON 状态页输出 |
+| `tests/rag_heading_retrieval.py` | 标题/章节命中 smoke test |
+| `tests/rag_regression_suite.py` | 真实问法回归集 |
 | `configs/voice.yaml` | 默认板端配置 |
 | `configs/voice_fast.yaml` | 极速模式配置 |
 | `scripts/voice.sh` | 统一脚本入口 |
@@ -119,16 +128,17 @@
 1. 如果看到 `D:\spacemit\spacemit_project` 工作区很脏，不要把它当成权威状态
 2. 先看板端 `git status` 和板端 `git log`
 3. 最终提交默认发生在板端 canonical repo
-4. GitHub 已经和板端同步，但板端本机暂时还没有 GitHub 认证能力
+4. GitHub 已经和板端同步到 `bc6a5d2`，但板端本机暂时还没有 GitHub 认证能力
 
 ## 7. 当前已知限制与未完项
 
 | 项目 | 当前情况 | 影响 |
 |---|---|---|
 | 板端直推 GitHub | 未配置 GitHub 认证 | 当前仍需 Windows 辅助推送 |
-| 知识库规模 | 只有种子知识卡 | 回答质量上限仍受限 |
+| 知识库规模 | 已扩到 15 篇，但仍不算大 | 回答质量还有继续提升空间 |
 | 状态页形态 | 文件输出型，不是完整前端应用 | 更适合看板/调试，产品化还可继续做 |
 | TTS 冷启动 | 约 24-25 秒 | 首次启动仍偏慢 |
+| 扫描 PDF 处理 | 当前主要依赖 Windows 侧 OCR 辅助 | 纯板端 OCR 流程尚未工程化 |
 | 外设联调覆盖 | 需按任务继续补 | 相机/麦克风/更多板载能力仍可继续深入 |
 
 ## 8. 当前推荐下一步优先级
@@ -136,10 +146,11 @@
 | 优先级 | 建议工作 |
 |---|---|
 | P1 | 给板端配置 GitHub SSH key，让 canonical repo 能直接推 GitHub |
-| P1 | 导入真实领域资料，扩充知识库而不是只靠 5 份种子知识卡 |
-| P1 | 针对真实任务继续板端语音闭环验证 |
+| P1 | 继续导入真实领域资料、巡检记录、扫描件 OCR 结果，扩充知识库 |
+| P1 | 围绕真实现场问法继续扩回归集，不只停在当前 `16/16` |
 | P2 | 优化 TTS 冷启动时间与常驻流程 |
 | P2 | 继续把状态页做成更接近实机展示界面的板端页面 |
+| P2 | 把 OCR 导入清洗流程再脚本化，减少手工整理 |
 | P3 | 根据任务再接相机、外设、多模态能力 |
 
 ## 9. 新对话接手时，Codex 应该先做什么
@@ -175,7 +186,7 @@ ssh fyp@192.168.3.38 "cd /mnt/ssd/spacemit_project && bash scripts/voice.sh doct
 下面这段可以直接复制到新对话里：
 
 ```text
-请先把 /mnt/ssd/spacemit_project 视为唯一 canonical repo，不要先相信 D:\spacemit\spacemit_project 的本地 git 状态。先通过 SSH 检查板端 git status、git log 和 bash scripts/voice.sh doctor，再基于 docs/project-status-handoff.md、docs/git-maintenance.md、docs/phase3-rag-ui.md 进入工作。当前 GitHub 仓库是 https://github.com/ggbxffcrqbb-lab/spacemit_project.git，但板端本机暂未配置 GitHub 认证，必要时可通过 Windows 侧凭据辅助推送。模型权重不进 Git，正式模型目录是 /mnt/ssd/models。
+请先把 /mnt/ssd/spacemit_project 视为唯一 canonical repo，不要先相信 D:\spacemit\spacemit_project 的本地 git 状态。先通过 SSH 检查板端 git status、git log 和 bash scripts/voice.sh doctor，再基于 docs/project-status-handoff.md、docs/git-maintenance.md、docs/phase3-rag-ui.md 进入工作。当前板端与 GitHub 已同步到 bc6a5d2；GitHub 仓库是 https://github.com/ggbxffcrqbb-lab/spacemit_project.git，但板端本机暂未配置 GitHub 认证，必要时可通过 Windows 侧干净镜像辅助推送。模型权重不进 Git，正式模型目录是 /mnt/ssd/models。当前知识库已有 15 篇文档、174 个 chunks，并有 tests/rag_regression_suite.py 可直接做问法回归。
 ```
 
 ## 11. 交接时的关键注意事项
@@ -194,9 +205,9 @@ ssh fyp@192.168.3.38 "cd /mnt/ssd/spacemit_project && bash scripts/voice.sh doct
 |---|---|
 | 项目已进入可维护状态 | 不再是样例堆叠阶段 |
 | 板端真源明确 | `/mnt/ssd/spacemit_project` |
-| GitHub 已可用 | 当前代码和文档已同步 |
-| Phase 3.5 已基本落地 | RAG、导入器、状态页、Git 治理都已到位 |
-| 后续重点 | 扩知识库、直连 GitHub、继续板端闭环验证 |
+| GitHub 已可用 | 当前代码和文档已同步到 `bc6a5d2` |
+| Phase 3.5 已继续推进 | RAG、导入器、状态页、Git 治理、检索增强、OCR 导入和回归测试都已到位 |
+| 后续重点 | 扩知识库、直连 GitHub、继续板端闭环验证与 OCR 工程化 |
 
 如果新 Codex 只记住四句话，记这四句就够了：
 

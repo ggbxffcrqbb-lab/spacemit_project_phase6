@@ -1,8 +1,8 @@
 # 项目现状与交接说明
 
-适用时间：`2026-06-17`
+适用时间：`2026-06-24`
 
-适用目的：给新的 Codex 对话、临时接手开发者、后续维护者快速建立项目上下文，避免重复摸底。
+适用目的：给新的 Codex 对话、临时接手开发者、后续维护者快速建立上下文。此文档以**板端 `/mnt/ssd/spacemit_project`** 为唯一真源，不以 Windows 工作区为准。
 
 ## 1. 一句话总览
 
@@ -11,14 +11,15 @@
 | 项目名称 | `spacemit_project` |
 | 目标平台 | `Muse Pi Pro (K1)` |
 | 唯一 canonical repo | `/mnt/ssd/spacemit_project` |
-| GitHub 仓库 | `https://github.com/ggbxffcrqbb-lab/spacemit_project.git` |
+| GitHub 仓库 | `git@github.com:ggbxffcrqbb-lab/spacemit_project.git` |
 | 当前主分支 | `main` |
-| 当前板端提交 | `bc6a5d2` |
-| 当前 GitHub `main` | 已与板端 `bc6a5d2` 同步 |
+| 当前板端提交 | `8bf5442` |
+| 当前 GitHub `main` | 已与板端 `8bf5442` 同步 |
+| Windows 工作区 | 仅作辅助编辑/传文件，不再作为 Git 真源 |
 
 一句话结论：
 
-项目已经完成“板端正式工程收口 + 基础语音链路 + 本地 RAG + 更强知识导入 + 状态页 + Git 管理治理 + 标题/章节增强检索 + OCR 导入 + 回归测试集”，现在已经不是散落样例阶段，而是进入“可以持续维护和迭代的板端正式工程”阶段。
+项目已经完成板端正式工程收口、本地 RAG、增强知识导入、Phase 4 第一轮海工/油气/视觉缺陷补库，以及 `42/42` 现场问法回归命中；后续工作继续以板端为主推进。
 
 ## 2. 当前开发进度
 
@@ -27,72 +28,48 @@
 | 模块 | 当前进度 | 说明 |
 |---|---|---|
 | 板端正式工程目录 | 已完成 | 真源固定为 `/mnt/ssd/spacemit_project` |
-| GitHub 同步链路 | 已完成 | GitHub 仓库已建立并同步到当前主线 |
-| Git 治理 | 已完成 | 已把 bootstrap 大模型权重从 Git 历史/索引剥离 |
-| ASR | 已完成基础接入 | 优先使用官方 `model_quant_optimized.onnx` |
-| LLM | 已完成基础接入 | 默认 `qwen2.5:0.5b`，保留 `smollm2:135m` 极速模式 |
-| TTS | 已完成基础接入 | Matcha TTS 常驻路径已稳定 |
+| GitHub 同步链路 | 已完成 | 当前板端主线已同步到 GitHub |
+| Git 治理 | 已完成 | 以后默认只在板端操作 Git |
+| ASR | 已完成基础接入 | 默认官方优化模型优先 |
+| LLM | 已完成基础接入 | 默认 `qwen2.5:0.5b` |
+| TTS | 已完成基础接入 | Matcha TTS 常驻路径稳定 |
 | 常驻语音服务 | 已完成 | `voice-console / warmup / doctor` 已统一 |
-| 本地 RAG | 已完成最小可用版 | 本地知识卡 + BM25/关键词检索 + 引用输出 |
+| 本地 RAG | 已完成可维护版 | 本地知识库 + BM25/关键词检索 + 引用输出 |
 | 知识导入器 | 已完成增强版 | 支持 `.md/.txt/.pdf/.docx`、递归导入、分类/标签 |
-| RAG 检索增强 | 已完成第一轮 | 标题、章节标题已并入索引与打分，补了短语直命中的保底逻辑 |
+| RAG 检索增强 | 已完成第一轮 | 标题、章节标题已并入索引与打分 |
 | 状态页 | 已完成 | 输出 `html/json/txt` 三份状态文件 |
-| 现场资料扩充 | 已完成第一轮 | 已导入公开资料、OCR 结果和结构化知识卡 |
-| 回归测试 | 已完成第一轮 | 板端 `tests/rag_regression_suite.py` 已做到 `16/16` 常见问法命中 |
-| 维护文档 | 已完成第一轮 | Git 维护手册已补齐 |
+| 公开资料/OCR 导入 | 已完成第一轮 | 已形成 `field_public_*` 与 `web_authority` |
+| Phase 4 补库 | 已完成第一轮 | 已形成 `phase4_raw`、`phase4_cards_rules/sop/visual` |
+| 回归测试 | 已完成第二轮 | `tests/rag_regression_suite.py` 当前 `42/42` 命中 |
+| 维护文档 | 已更新 | README 与本交接文档已按 2026-06-24 现状更新 |
 
 ### 2.2 当前阶段判断
 
 | 维度 | 判断 |
 |---|---|
-| 工程化程度 | 已从“样例拼装”进入“正式项目维护态” |
+| 工程化程度 | 已从样例拼装进入正式维护态 |
 | 板端开发能力 | 已具备 |
-| 本地知识库能力 | 已超过最小闭环，进入“可做真实问法回归”的阶段 |
-| GitHub 对外协作能力 | 已具备 |
-| 直接板端推 GitHub | 还未最终打通认证 |
-| 真正的领域知识规模 | 仍不算大，但已不再只有种子知识卡 |
-| 外设/实机联调完备度 | 仍需按任务继续推进 |
+| 本地知识库能力 | 已超过最小闭环，进入持续补库与回归阶段 |
+| GitHub 协作能力 | 已具备 |
+| Windows 侧定位 | 次要工作区，不再承担 Git 权威职责 |
+| 实机联调完备度 | 仍需按任务继续推进 |
 
-## 3. 当前已验证可用的能力
-
-以下内容已在板端真实执行过，不是纯 Windows 假验证。
-
-| 能力 | 现状 |
-|---|---|
-| `bash scripts/voice.sh doctor` | 可运行 |
-| `bash scripts/voice.sh warmup` | 可运行 |
-| `bash scripts/voice.sh voice-console` | 入口已具备 |
-| `python -m app.main rag-query` | 可运行 |
-| `python -m app.main rag-rebuild` | 可运行 |
-| `python -m app.main knowledge-import` | 可运行 |
-| `python tests/rag_heading_retrieval.py` | 可运行 |
-| `python tests/rag_regression_suite.py` | 可运行，当前命中 `16/16` |
-| 状态页文件输出 | 可运行 |
-| GitHub 同步 | 已可通过 Windows 干净镜像辅助推送完成 |
-
-## 4. 板端最新运行状态快照
-
-以下状态基于 `2026-06-16` 至 `2026-06-17` 的板端验证与导入结果。
+## 3. 当前已验证的关键结果
 
 | 项目 | 当前值 |
 |---|---|
-| 项目根目录 | `/mnt/ssd/spacemit_project` |
+| 板端项目根目录 | `/mnt/ssd/spacemit_project` |
 | 模型目录 | `/mnt/ssd/models` |
-| ASR 模型目录存在 | 是 |
-| ASR 实际使用模型 | `/mnt/ssd/models/asr/sensevoice-small/model_quant_optimized.onnx` |
-| TTS 目录存在 | 是 |
-| TTS 当前常驻 preset | `matcha_zh` |
-| TTS 初始化耗时 | 约 `24-25s` |
-| RAG 已启用 | 是 |
-| 知识库目录 | `/mnt/ssd/spacemit_project/data/knowledge` |
-| 当前知识文档数 | `15` |
-| 当前 chunk 数 | `174` |
-| 已导入子目录 | `imported/web_authority`、`imported/field_public_raw`、`imported/field_public_ocr` |
-| 状态页目录 | `/mnt/ssd/logs/spacemit_project/ui` |
-| 状态页格式 | `status_page.html / status_state.json / status_screen.txt` |
-| GitHub 同步状态 | 已同步到 `bc6a5d2` |
+| 当前知识文档数 | `126` |
+| 当前 chunk 数 | `15540` |
+| Phase 4 原始导入层 | `data/knowledge/imported/phase4_raw/` |
+| Phase 4 规则卡 | `data/knowledge/imported/phase4_cards_rules/` |
+| Phase 4 SOP 卡 | `data/knowledge/imported/phase4_cards_sop/` |
+| Phase 4 视觉判读卡 | `data/knowledge/imported/phase4_cards_visual/` |
+| 板端 `rag-rebuild` | 已成功执行 |
+| 板端 `rag_regression_suite.py` | 已成功执行，`42/42` 命中 |
 
-## 5. 当前项目结构重点
+## 4. 当前项目结构重点
 
 | 路径 | 作用 |
 |---|---|
@@ -101,117 +78,94 @@
 | `app/rag/knowledge_base.py` | 本地检索与索引缓存 |
 | `app/rag/importer.py` | 强化版知识导入器 |
 | `app/ui/status_page.py` | 文本/HTML/JSON 状态页输出 |
-| `tests/rag_heading_retrieval.py` | 标题/章节命中 smoke test |
-| `tests/rag_regression_suite.py` | 真实问法回归集 |
-| `configs/voice.yaml` | 默认板端配置 |
-| `configs/voice_fast.yaml` | 极速模式配置 |
-| `scripts/voice.sh` | 统一脚本入口 |
+| `scripts/voice.sh` | 板端统一脚本入口 |
 | `scripts/knowledge_import.sh` | 知识导入快捷入口 |
-| `scripts/prepare_models.sh` | 板端模型目录校验与补齐脚本 |
-| `data/knowledge/` | 本地知识资料 |
-| `data/index/` | RAG 索引缓存 |
-| `docs/git-maintenance.md` | Git 管理规则 |
-| `docs/phase3-rag-ui.md` | RAG + 状态页说明 |
+| `scripts/build_phase4_knowledge_assets.py` | Phase 4 资料导入层与知识卡生成脚本 |
+| `tests/rag_regression_suite.py` | 真实现场问法回归集 |
+| `data/knowledge/imported/phase4_raw/` | Phase 4 原始正文导入层 |
+| `data/knowledge/imported/phase4_cards_*` | Phase 4 结构化知识卡 |
 
-## 6. 当前 Git 管理现状
+## 5. 当前 Git 管理现状
 
 | 项目 | 当前规则 |
 |---|---|
 | 真源仓库 | 只认板端 `/mnt/ssd/spacemit_project` |
-| Windows 仓库 | 只是辅助镜像，不是最终发布依据 |
-| GitHub 仓库 | 对外同步源码，不承担模型权重托管 |
-| bootstrap 模型权重 | 不再进入 Git 历史 |
-| 大改前保护 | 先打 `backup/*` 分支 |
+| Git 提交位置 | 默认只在板端 canonical repo |
+| GitHub 推送位置 | 默认只从板端推送 |
+| Windows 仓库 | 不再保留 `.git`，仅作辅助工作区 |
+| 大模型权重 | 不进 Git |
+| 需要回退历史时 | 以板端 Git 提交记录为准 |
 
 当前要特别提醒新的 Codex：
 
-1. 如果看到 `D:\spacemit\spacemit_project` 工作区很脏，不要把它当成权威状态
-2. 先看板端 `git status` 和板端 `git log`
-3. 最终提交默认发生在板端 canonical repo
-4. GitHub 已经和板端同步到 `bc6a5d2`，但板端本机暂时还没有 GitHub 认证能力
+1. 不要把 Windows 目录当成 Git 权威状态。
+2. 所有版本判断先看板端 `git status`、`git log`。
+3. 如果需要修改文件，可以在 Windows 辅助编辑，但最后必须同步回板端、在板端验证、在板端提交。
 
-## 7. 当前已知限制与未完项
+## 6. 当前已知限制
 
 | 项目 | 当前情况 | 影响 |
 |---|---|---|
-| 板端直推 GitHub | 未配置 GitHub 认证 | 当前仍需 Windows 辅助推送 |
-| 知识库规模 | 已扩到 15 篇，但仍不算大 | 回答质量还有继续提升空间 |
-| 状态页形态 | 文件输出型，不是完整前端应用 | 更适合看板/调试，产品化还可继续做 |
-| TTS 冷启动 | 约 24-25 秒 | 首次启动仍偏慢 |
-| 扫描 PDF 处理 | 当前主要依赖 Windows 侧 OCR 辅助 | 纯板端 OCR 流程尚未工程化 |
-| 外设联调覆盖 | 需按任务继续补 | 相机/麦克风/更多板载能力仍可继续深入 |
+| `python -m app.main doctor` 直接运行 | 依赖环境未完整就绪时可能缺 `sounddevice` | 板端健康检查优先走 `bash scripts/voice.sh doctor` |
+| 知识库规模 | 已扩到 `126` 篇，但仍可继续扩 | 回答质量仍可继续提升 |
+| OCR 流程 | 仍有一部分依赖 Windows 侧整理 | 纯板端 OCR 还未工程化完毕 |
+| 外设联调覆盖 | 需按任务继续补 | 相机/麦克风/更多板载能力仍需专项推进 |
 
-## 8. 当前推荐下一步优先级
+## 7. 当前推荐下一步优先级
 
 | 优先级 | 建议工作 |
 |---|---|
-| P1 | 给板端配置 GitHub SSH key，让 canonical repo 能直接推 GitHub |
-| P1 | 继续导入真实领域资料、巡检记录、扫描件 OCR 结果，扩充知识库 |
-| P1 | 围绕真实现场问法继续扩回归集，不只停在当前 `16/16` |
+| P1 | 继续导入真实巡检记录、扫描件 OCR、SOP、现场记录模板 |
+| P1 | 按更真实的现场口语继续扩 `tests/rag_regression_suite.py` |
+| P1 | 继续在板端执行 `rag-rebuild`、`rag-query`、`rag_regression_suite.py` 做闭环验证 |
 | P2 | 优化 TTS 冷启动时间与常驻流程 |
-| P2 | 继续把状态页做成更接近实机展示界面的板端页面 |
-| P2 | 把 OCR 导入清洗流程再脚本化，减少手工整理 |
-| P3 | 根据任务再接相机、外设、多模态能力 |
+| P2 | 把 OCR 清洗和知识卡生成进一步脚本化 |
+| P2 | 继续补状态页和现场展示逻辑 |
+| P3 | 按任务继续接相机、外设、多模态能力 |
 
-## 9. 新对话接手时，Codex 应该先做什么
+## 8. 新对话接手时先做什么
 
-这是给“新对话里的 Codex”最重要的一节。
-
-### 9.1 先相信什么
+### 8.1 先相信什么
 
 | 应先相信 | 不应先相信 |
 |---|---|
-| 板端 `/mnt/ssd/spacemit_project` | Windows 本地脏工作区状态 |
-| 板端 `git status` / `git log` | 记忆里的旧目录结构 |
-| 板端 `doctor` 结果 | Windows 侧模拟运行结果 |
+| 板端 `/mnt/ssd/spacemit_project` | Windows 本地目录的 Git 状态 |
+| 板端 `git status` / `git log` | 历史对话里的旧提交号 |
+| 板端 `rag-rebuild` / 回归结果 | Windows 侧的假设性判断 |
 
-### 9.2 第一轮必做检查
+### 8.2 第一轮必做检查
 
 ```bash
 ssh fyp@192.168.3.38 "cd /mnt/ssd/spacemit_project && git status --short --branch && git log --oneline --decorate -n 5"
 ssh fyp@192.168.3.38 "cd /mnt/ssd/spacemit_project && bash scripts/voice.sh doctor"
+ssh fyp@192.168.3.38 "cd /mnt/ssd/spacemit_project && PYTHONPATH=. python3 tests/rag_regression_suite.py"
 ```
 
-### 9.3 如果需要继续做功能开发
+### 8.3 如果需要继续做功能开发
 
 推荐顺序：
 
-1. 先在板端读当前代码与配置
-2. 再决定是否需要从 Windows 侧辅助编辑
-3. 修改后回板端验证
-4. 通过板端 canonical repo 提交
+1. 先在板端读当前代码与配置。
+2. 如需批量整理资料，可在 Windows 侧辅助处理。
+3. 修改后同步回板端。
+4. 在板端执行验证。
+5. 通过板端 canonical repo 提交并推送 GitHub。
 
-## 10. 建议给新 Codex 的启动提示词
+## 9. 给新 Codex 的启动提示词
 
 下面这段可以直接复制到新对话里：
 
 ```text
-请先把 /mnt/ssd/spacemit_project 视为唯一 canonical repo，不要先相信 D:\spacemit\spacemit_project 的本地 git 状态。先通过 SSH 检查板端 git status、git log 和 bash scripts/voice.sh doctor，再基于 docs/project-status-handoff.md、docs/git-maintenance.md、docs/phase3-rag-ui.md 进入工作。当前板端与 GitHub 已同步到 bc6a5d2；GitHub 仓库是 https://github.com/ggbxffcrqbb-lab/spacemit_project.git，但板端本机暂未配置 GitHub 认证，必要时可通过 Windows 侧干净镜像辅助推送。模型权重不进 Git，正式模型目录是 /mnt/ssd/models。当前知识库已有 15 篇文档、174 个 chunks，并有 tests/rag_regression_suite.py 可直接做问法回归。
+请先把 /mnt/ssd/spacemit_project 视为唯一 canonical repo，不要先相信 Windows 本地目录的 Git 状态，因为以后只在板端操作 Git。先通过 SSH 检查板端 git status、git log、bash scripts/voice.sh doctor，并阅读 docs/project-status-handoff.md、docs/git-maintenance.md、docs/phase3-rag-ui.md。当前板端与 GitHub 已同步到 8bf5442。当前知识库已有 126 篇文档、15540 个 chunks，Phase 4 第一轮补库已落在 data/knowledge/imported/phase4_raw 与 phase4_cards_rules/sop/visual，tests/rag_regression_suite.py 当前 42/42 命中。后续继续以板端为准推进补库、回归和实机验证。
 ```
 
-## 11. 交接时的关键注意事项
-
-| 注意项 | 说明 |
-|---|---|
-| 不要误把 Windows 仓当真源 | 当前本地工作区 git 历史未完全对齐板端 |
-| 不要把模型权重重新提交进 Git | 当前治理刚刚收口 |
-| 不要跳过板端验证 | 本项目最终以 Muse Pi Pro 为准 |
-| 不要贸然重写历史 | 如果必须这么做，先打 `backup/*` |
-| 不要把“命令执行成功”说成“实机体验完全验证” | 板端体验类任务仍要看实机效果 |
-
-## 12. 交接结论
+## 10. 交接结论
 
 | 结论 | 说明 |
 |---|---|
 | 项目已进入可维护状态 | 不再是样例堆叠阶段 |
 | 板端真源明确 | `/mnt/ssd/spacemit_project` |
-| GitHub 已可用 | 当前代码和文档已同步到 `bc6a5d2` |
-| Phase 3.5 已继续推进 | RAG、导入器、状态页、Git 治理、检索增强、OCR 导入和回归测试都已到位 |
-| 后续重点 | 扩知识库、直连 GitHub、继续板端闭环验证与 OCR 工程化 |
-
-如果新 Codex 只记住四句话，记这四句就够了：
-
-1. 先看板端，不先看 Windows
-2. 先确认真源，再修改代码
-3. 模型不进 Git，代码才进 Git
-4. 任何“已完成”都优先以板端验证为准
+| GitHub 已同步 | 当前主线已与板端一致 |
+| Windows 只保留辅助职责 | 以后不再承担 Git 权威角色 |
+| Phase 4 已推进 | 补库、知识卡、回归验证均已落地 |
+| 后续重点 | 扩真实资料、扩问法、继续板端闭环验证 |
